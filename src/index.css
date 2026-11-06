@@ -1,0 +1,94 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', 'Cairo', ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: 'Cairo', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --color-ink: #07070c;
+  --color-ink-2: #0e0e17;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-mute: #8b8ba7;
+  --color-violet: #8b5cf6;
+  --color-pink: #ec4899;
+  --color-orange: #fb923c;
+  --color-lime: #bef264;
+
+  --animate-scan: scan 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  --animate-shimmer: shimmer 2.4s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+}
+
+@keyframes scan {
+  0%, 100% { top: 4%; }
+  50% { top: 92%; }
+}
+@keyframes shimmer {
+  to { background-position: 200% center; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-10px) rotate(-1deg); }
+}
+
+:root {
+  color-scheme: dark;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[lang='ar'] body {
+  font-family: var(--font-arabic);
+}
+
+body {
+  @apply bg-ink text-white antialiased;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* Component classes live in a layer so Tailwind utilities can override them. */
+@layer components {
+  .text-gradient {
+    background: linear-gradient(90deg, var(--color-violet), var(--color-pink), var(--color-orange), var(--color-pink), var(--color-violet));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: var(--animate-shimmer);
+  }
+
+  .glass {
+    @apply border border-line bg-white/[0.035] backdrop-blur-xl;
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 20px 50px -20px rgb(0 0 0 / 0.6);
+  }
+
+  /* Inputs that look like plain text until focused */
+  .field {
+    @apply w-full rounded-xl border border-transparent bg-transparent px-2 py-1.5 outline-none transition-colors;
+    @apply hover:bg-white/[0.04] focus:border-violet/60 focus:bg-white/[0.06];
+  }
+
+  /* Torn-paper edge for the receipt-style cards */
+  .receipt-edge {
+    --tooth: 10px;
+    mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / var(--tooth) 100%;
+  }
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+::selection {
+  background: rgb(139 92 246 / 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
