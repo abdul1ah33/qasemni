@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import confetti from 'canvas-confetti';
+import { isLite } from '@/lib/perf';
 import { AnimatePresence, motion } from 'motion/react';
 import { Check, ChevronDown, Copy, MessageCircle, Receipt, Share2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -24,7 +25,7 @@ export function SummaryStep() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const colors = ['#8b5cf6', '#ec4899', '#fb923c', '#bef264'];
     const t = setTimeout(() => {
-      confetti({ particleCount: 90, spread: 75, origin: { y: 0.3 }, colors, disableForReducedMotion: true });
+      confetti({ particleCount: isLite ? 45 : 90, spread: 75, origin: { y: 0.3 }, colors, disableForReducedMotion: true });
     }, 350);
     return () => clearTimeout(t);
   }, []);

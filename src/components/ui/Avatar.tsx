@@ -32,7 +32,6 @@ interface AvatarProps {
 export function Avatar({ person, size = 40, active = true, className }: AvatarProps) {
   return (
     <motion.span
-      layout
       className={clsx(
         'inline-flex shrink-0 items-center justify-center rounded-full bg-linear-to-br font-bold text-ink transition-[filter,opacity] duration-300',
         AVATAR_GRADIENTS[person.color % AVATAR_GRADIENTS.length],

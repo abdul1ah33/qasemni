@@ -72,7 +72,6 @@ export function AssignStep() {
             <motion.li
               key={item.id}
               variants={fadeUp}
-              layout
               className={clsx(
                 'glass relative overflow-hidden rounded-3xl p-4 transition-colors',
                 count > 0 && 'border-lime/25',

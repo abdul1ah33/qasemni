@@ -103,7 +103,7 @@ export function ScanStep() {
           animate={{ rotate: 360 }}
           transition={{ duration: dragging ? 2 : 8, repeat: Infinity, ease: 'linear' }}
         />
-        <div className="relative flex flex-col items-center gap-5 rounded-[calc(2rem-1.5px)] bg-ink-2/95 px-5 py-8 text-center backdrop-blur-xl sm:py-10">
+        <div className="relative flex flex-col items-center gap-5 rounded-[calc(2rem-1.5px)] bg-ink-2/95 px-5 py-8 text-center sm:py-10">
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <Button variant="primary" size="lg" onClick={() => setCameraOpen(true)} icon={<Camera className="h-5 w-5" />}>
               {d.takePhoto}

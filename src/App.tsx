@@ -10,6 +10,7 @@ import { ReviewStep } from '@/features/review/ReviewStep';
 import { PeopleStep } from '@/features/people/PeopleStep';
 import { AssignStep } from '@/features/assign/AssignStep';
 import { SummaryStep } from '@/features/summary/SummaryStep';
+import { isLite } from '@/lib/perf';
 
 const SCREENS: Record<Step, ComponentType> = {
   scan: ScanStep,
@@ -47,14 +48,23 @@ export default function App() {
             <motion.div
               key={step}
               custom={offset}
-              variants={{
-                enter: (o: number) => ({ opacity: 0, x: o, filter: 'blur(6px)' }),
-                // Drop the filter once settled: CSS filters make `position: fixed`
-                // children (modals, lightbox) position relative to this wrapper.
-                center: { opacity: 1, x: 0, filter: 'blur(0px)', transitionEnd: { filter: 'none' } },
-                // No filter on exit: animating from `filter: none` never resolves.
-                exit: (o: number) => ({ opacity: 0, x: -o }),
-              }}
+              variants={
+                isLite
+                  ? {
+                      // Phones: transform + opacity only, which stay on the compositor.
+                      enter: (o: number) => ({ opacity: 0, x: o * 0.5 }),
+                      center: { opacity: 1, x: 0 },
+                      exit: (o: number) => ({ opacity: 0, x: -o * 0.5 }),
+                    }
+                  : {
+                      enter: (o: number) => ({ opacity: 0, x: o, filter: 'blur(6px)' }),
+                      // Drop the filter once settled: CSS filters make `position: fixed`
+                      // children (modals, lightbox) position relative to this wrapper.
+                      center: { opacity: 1, x: 0, filter: 'blur(0px)', transitionEnd: { filter: 'none' } },
+                      // No filter on exit: animating from `filter: none` never resolves.
+                      exit: (o: number) => ({ opacity: 0, x: -o }),
+                    }
+              }
               initial="enter"
               animate="center"
               exit="exit"
