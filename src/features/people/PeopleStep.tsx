@@ -1,11 +1,10 @@
-import { AnimatePresence, motion } from 'motion/react';
 import { Plus, UserRound, X } from 'lucide-react';
 import { useRef, useState, type FormEvent } from 'react';
 import { useI18n } from '@/i18n';
 import { useBill } from '@/store/billStore';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
-import { StepLayout, fadeUp } from '@/components/layout/StepLayout';
+import { StepLayout } from '@/components/layout/StepLayout';
 
 export function PeopleStep() {
   const { dict, t } = useI18n();
@@ -34,7 +33,7 @@ export function PeopleStep() {
       canContinue={people.length >= 2}
       footerNote={people.length < 2 ? <p className="text-center text-xs text-mute">{d.needTwo}</p> : undefined}
     >
-      <motion.form variants={fadeUp} onSubmit={submit} className="glass flex items-center gap-2 rounded-3xl p-2 ps-4">
+      <form onSubmit={submit} className="glass flex items-center gap-2 rounded-3xl p-2 ps-4">
         <UserRound className="h-5 w-5 shrink-0 text-mute" />
         <input
           ref={inputRef}
@@ -48,28 +47,22 @@ export function PeopleStep() {
         <Button type="submit" variant="primary" disabled={!name.trim()} icon={<Plus className="h-5 w-5" />}>
           {d.add}
         </Button>
-      </motion.form>
+      </form>
 
       {!hasMe && (
-        <motion.div variants={fadeUp}>
+        <div>
           <Button variant="soft" size="sm" onClick={() => addPerson(d.me)} icon={<Plus className="h-4 w-4" />}>
             {d.me}
           </Button>
-        </motion.div>
+        </div>
       )}
 
-      <motion.div variants={fadeUp}>
+      <div>
         <p className="mb-3 text-sm text-mute">{t(d.count, { n: people.length })}</p>
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <AnimatePresence>
-            {people.map((p, i) => (
-              <motion.li
+            {people.map((p) => (
+              <li
                 key={p.id}
-                layout
-                initial={{ opacity: 0, scale: 0.6, rotate: -6 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                exit={{ opacity: 0, scale: 0.6, transition: { duration: 0.15 } }}
-                transition={{ type: 'spring', stiffness: 420, damping: 24, delay: Math.min(i, 6) * 0.02 }}
                 className="glass group relative flex flex-col items-center gap-2 rounded-3xl p-4"
               >
                 <Avatar person={p} size={56} />
@@ -81,16 +74,15 @@ export function PeopleStep() {
                 />
                 <button
                   onClick={() => removePerson(p.id)}
-                  className="absolute top-2 end-2 grid h-7 w-7 cursor-pointer place-items-center rounded-full text-mute transition hover:bg-red-500/15 hover:text-red-400"
+                  className="absolute top-2 end-2 grid h-7 w-7 cursor-pointer place-items-center rounded-full text-mute hover:bg-red-500/15 hover:text-red-400"
                   aria-label="remove"
                 >
                   <X className="h-4 w-4" />
                 </button>
-              </motion.li>
+              </li>
             ))}
-          </AnimatePresence>
         </ul>
-      </motion.div>
+      </div>
     </StepLayout>
   );
 }

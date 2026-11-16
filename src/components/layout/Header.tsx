@@ -1,4 +1,3 @@
-import { motion } from 'motion/react';
 import { Languages, RotateCcw } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { useBill } from '@/store/billStore';
@@ -8,15 +7,14 @@ export function Logo() {
   const { dict } = useI18n();
   return (
     <div className="flex items-center gap-2.5">
-      <motion.div
-        whileHover={{ rotate: -8, scale: 1.08 }}
+      <div
         className="relative grid h-9 w-9 place-items-center rounded-xl bg-[linear-gradient(135deg,var(--color-violet),var(--color-pink),var(--color-orange))]"
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
           <path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21z" fill="#07070c" />
           <path d="M12 7v9" stroke="#bef264" strokeWidth="2" strokeLinecap="round" strokeDasharray="2 2.5" />
         </svg>
-      </motion.div>
+      </div>
       <span className="text-lg font-extrabold tracking-tight">{dict.appName}</span>
     </div>
   );

@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'motion/react';
 import { Camera, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '@/i18n';
@@ -17,7 +16,6 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const fallbackRef = useRef<HTMLInputElement>(null);
   const [denied, setDenied] = useState(false);
-  const [flash, setFlash] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -50,43 +48,23 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
   const shoot = async () => {
     const video = videoRef.current;
     if (!video || !video.videoWidth) return;
-    setFlash(true);
-    const blob = await captureVideoFrame(video);
-    setTimeout(() => {
-      setFlash(false);
-      onCapture(blob);
-    }, 220);
+    onCapture(await captureVideoFrame(video));
   };
 
+  if (!open) return null;
+
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-50 flex flex-col bg-black"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
+        <div className="fixed inset-0 z-50 flex flex-col bg-black">
           <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 h-full w-full object-cover" />
 
           {/* Viewfinder */}
           <div className="pointer-events-none absolute inset-0 grid place-items-center">
-            <motion.div
-              initial={{ scale: 1.15, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 22, delay: 0.1 }}
-              className="relative aspect-[3/5] w-[72vw] max-w-sm rounded-3xl shadow-[0_0_0_9999px_rgb(0_0_0/0.55)]"
+            <div className="relative aspect-[3/5] w-[72vw] max-w-sm rounded-3xl shadow-[0_0_0_9999px_rgb(0_0_0/0.55)]"
             >
               {['top-0 left-0 border-t-4 border-l-4 rounded-tl-3xl', 'top-0 right-0 border-t-4 border-r-4 rounded-tr-3xl', 'bottom-0 left-0 border-b-4 border-l-4 rounded-bl-3xl', 'bottom-0 right-0 border-b-4 border-r-4 rounded-br-3xl'].map((c) => (
-                <motion.span
-                  key={c}
-                  className={`absolute h-10 w-10 border-lime ${c}`}
-                  animate={{ opacity: [1, 0.5, 1] }}
-                  transition={{ duration: 1.6, repeat: Infinity }}
-                />
+                <span key={c} className={`absolute h-10 w-10 border-lime ${c}`} />
               ))}
-              <div className="absolute inset-x-4 h-0.5 animate-scan bg-lime shadow-[0_0_20px_4px_rgb(190_242_100/0.6)]" />
-            </motion.div>
+            </div>
           </div>
 
           <div className="relative flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))]">
@@ -113,24 +91,16 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
 
           {!denied && (
             <div className="relative mt-auto flex justify-center pb-[max(2rem,env(safe-area-inset-bottom))]">
-              <motion.button
-                whileTap={{ scale: 0.88 }}
+              <button
                 onClick={shoot}
                 aria-label={dict.camera.capture}
                 className="grid h-20 w-20 cursor-pointer place-items-center rounded-full border-4 border-white/80"
               >
                 <span className="h-14 w-14 rounded-full bg-[linear-gradient(135deg,var(--color-lime),var(--color-orange))]" />
-              </motion.button>
+              </button>
             </div>
           )}
 
-          <AnimatePresence>
-            {flash && (
-              <motion.div className="absolute inset-0 bg-white" initial={{ opacity: 0.9 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} />
-            )}
-          </AnimatePresence>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </div>
   );
 }

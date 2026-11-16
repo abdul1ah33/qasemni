@@ -13,22 +13,6 @@
   --color-pink: #ec4899;
   --color-orange: #fb923c;
   --color-lime: #bef264;
-
-  --animate-scan: scan 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-  --animate-shimmer: shimmer 2.4s linear infinite;
-  --animate-float: float 6s ease-in-out infinite;
-}
-
-@keyframes scan {
-  0%, 100% { top: 4%; }
-  50% { top: 92%; }
-}
-@keyframes shimmer {
-  to { background-position: 200% center; }
-}
-@keyframes float {
-  0%, 100% { transform: translateY(0) rotate(-3deg); }
-  50% { transform: translateY(-10px) rotate(-1deg); }
 }
 
 :root {
@@ -49,12 +33,10 @@ body {
 /* Component classes live in a layer so Tailwind utilities can override them. */
 @layer components {
   .text-gradient {
-    background: linear-gradient(90deg, var(--color-violet), var(--color-pink), var(--color-orange), var(--color-pink), var(--color-violet));
-    background-size: 200% auto;
+    background: linear-gradient(90deg, var(--color-violet), var(--color-pink), var(--color-orange));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    animation: var(--animate-shimmer);
   }
 
   .glass {
@@ -64,7 +46,7 @@ body {
 
   /* Inputs that look like plain text until focused */
   .field {
-    @apply w-full rounded-xl border border-transparent bg-transparent px-2 py-1.5 outline-none transition-colors;
+    @apply w-full rounded-xl border border-transparent bg-transparent px-2 py-1.5 outline-none;
     @apply hover:bg-white/[0.04] focus:border-violet/60 focus:bg-white/[0.06];
   }
 
@@ -76,8 +58,7 @@ body {
 
   /*
    * Phones & tablets: live backdrop blur behind every card is the biggest cause
-   * of janky scrolling, so glass becomes a slightly more opaque flat surface,
-   * and decorative infinite animations that repaint every frame are switched off.
+   * of janky scrolling, so glass becomes a slightly more opaque flat surface.
    */
   @media (hover: none), (pointer: coarse), (max-width: 767px) {
     .glass {
@@ -85,9 +66,6 @@ body {
       backdrop-filter: none;
       background-color: rgb(20 20 32 / 0.72);
       box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.05);
-    }
-    .text-gradient {
-      animation: none;
     }
   }
 }
@@ -102,17 +80,9 @@ input[type='number']::-webkit-outer-spin-button {
   background: rgb(139 92 246 / 0.4);
 }
 
-@media (hover: none), (pointer: coarse), (max-width: 767px) {
-  .animate-float {
-    animation: none;
-    transform: rotate(-3deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+/* No animations or transitions anywhere: the app should feel instant. */
+*, *::before, *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
 }

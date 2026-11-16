@@ -1,5 +1,4 @@
 import clsx from 'clsx';
-import { motion } from 'motion/react';
 import { useI18n } from '@/i18n';
 import { STEPS, useBill } from '@/store/billStore';
 
@@ -21,15 +20,13 @@ export function Stepper() {
             disabled={!done}
             onClick={() => goTo(s)}
             className={clsx(
-              'relative flex-1 rounded-xl px-1 py-2 text-[11px] font-semibold transition-colors sm:text-xs',
+              'relative flex-1 rounded-xl px-1 py-2 text-[11px] font-semibold sm:text-xs',
               active ? 'text-ink' : done ? 'cursor-pointer text-white hover:bg-white/5' : 'text-mute/60',
             )}
           >
             {active && (
-              <motion.span
-                layoutId="stepper-pill"
+              <span
                 className="absolute inset-0 rounded-xl bg-[linear-gradient(110deg,var(--color-lime),#fde68a)]"
-                transition={{ type: 'spring', stiffness: 400, damping: 32 }}
               />
             )}
             <span className="relative flex items-center justify-center gap-1">

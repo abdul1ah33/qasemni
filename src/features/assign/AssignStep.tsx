@@ -1,14 +1,13 @@
 import clsx from 'clsx';
-import { motion } from 'motion/react';
 import { Check, Equal, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import { useBill } from '@/store/billStore';
 import { computeSplit } from '@/core/split';
 import { Avatar } from '@/components/ui/Avatar';
-import { AnimatedMoney } from '@/components/ui/AnimatedMoney';
+import { Money } from '@/components/ui/Money';
 import { Button } from '@/components/ui/Button';
-import { StepLayout, fadeUp, stagger } from '@/components/layout/StepLayout';
+import { StepLayout } from '@/components/layout/StepLayout';
 
 export function AssignStep() {
   const { dict, t, money } = useI18n();
@@ -36,53 +35,43 @@ export function AssignStep() {
       }
     >
       {/* Live tally */}
-      <motion.section variants={fadeUp} className="glass -mx-1 rounded-3xl p-3">
+      <section className="glass -mx-1 rounded-3xl p-3">
         <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none]">
           {split.shares.map((s) => (
             <div key={s.person.id} className="flex min-w-[5.5rem] flex-col items-center gap-1.5 rounded-2xl px-2 py-1">
               <Avatar person={s.person} size={40} />
               <span className="max-w-20 truncate text-xs font-semibold">{s.person.name}</span>
-              <AnimatedMoney value={s.total} className="font-mono text-[11px] text-lime" />
+              <Money value={s.total} className="font-mono text-[11px] text-lime" />
             </div>
           ))}
         </div>
-      </motion.section>
+      </section>
 
-      <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-1 items-center gap-3">
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-            <motion.div
-              className="h-full rounded-full bg-lime"
-              animate={{ width: `${items.length ? (assigned / items.length) * 100 : 0}%` }}
-              transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-            />
+            <div className="h-full rounded-full bg-lime" style={{ width: `${items.length ? (assigned / items.length) * 100 : 0}%` }} />
           </div>
           <span className="text-xs whitespace-nowrap text-mute">{t(d.progress, { done: assigned, total: items.length })}</span>
         </div>
         <Button variant="soft" size="sm" onClick={splitEverythingEqually} icon={<Equal className="h-4 w-4 text-pink" />}>
           {d.splitEqually}
         </Button>
-      </motion.div>
+      </div>
 
-      <motion.ul variants={stagger} className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-3">
         {items.map((item) => {
           const everyone = people.length > 0 && people.every((p) => item.assignees.includes(p.id));
           const count = item.assignees.length;
           return (
-            <motion.li
+            <li
               key={item.id}
-              variants={fadeUp}
               className={clsx(
-                'glass relative overflow-hidden rounded-3xl p-4 transition-colors',
+                'glass relative overflow-hidden rounded-3xl p-4',
                 count > 0 && 'border-lime/25',
               )}
             >
-              <motion.span
-                className="absolute inset-y-0 start-0 w-1 bg-lime"
-                initial={false}
-                animate={{ scaleY: count > 0 ? 1 : 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              />
+              {count > 0 && <span className="absolute inset-y-0 start-0 w-1 bg-lime" />}
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate font-semibold">
@@ -90,32 +79,30 @@ export function AssignStep() {
                     {item.name || '—'}
                   </p>
                   {count > 1 && (
-                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-mute">
+                    <p className="text-xs text-mute">
                       {t(d.each, { amount: money(Math.round(item.price / count)) })}
-                    </motion.p>
+                    </p>
                   )}
                 </div>
                 <span className="font-mono font-semibold tabular-nums">{money(item.price)}</span>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => setItemEveryone(item.id, !everyone)}
                   className={clsx(
-                    'flex h-10 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-xs font-bold transition-colors',
+                    'flex h-10 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-xs font-bold',
                     everyone ? 'border-transparent bg-white text-ink' : 'border-line text-mute hover:text-white',
                   )}
                 >
                   <Users className="h-4 w-4" />
                   {d.everyone}
-                </motion.button>
+                </button>
                 {people.map((p) => {
                   const on = item.assignees.includes(p.id);
                   return (
-                    <motion.button
+                    <button
                       key={p.id}
-                      whileTap={{ scale: 0.85 }}
                       onClick={() => toggleAssignee(item.id, p.id)}
                       title={p.name}
                       aria-pressed={on}
@@ -123,23 +110,19 @@ export function AssignStep() {
                     >
                       <Avatar person={p} size={40} active={on} />
                       {on && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: 'spring', stiffness: 600, damping: 20 }}
-                          className="absolute -end-0.5 -bottom-0.5 grid h-4 w-4 place-items-center rounded-full bg-lime text-ink ring-2 ring-ink"
+                        <span className="absolute -end-0.5 -bottom-0.5 grid h-4 w-4 place-items-center rounded-full bg-lime text-ink ring-2 ring-ink"
                         >
                           <Check className="h-3 w-3" strokeWidth={3.5} />
-                        </motion.span>
+                        </span>
                       )}
-                    </motion.button>
+                    </button>
                   );
                 })}
               </div>
-            </motion.li>
+            </li>
           );
         })}
-      </motion.ul>
+      </ul>
     </StepLayout>
   );
 }

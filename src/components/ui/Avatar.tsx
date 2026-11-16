@@ -1,5 +1,4 @@
 import clsx from 'clsx';
-import { motion } from 'motion/react';
 import type { Person } from '@/core/types';
 
 export const AVATAR_GRADIENTS = [
@@ -31,16 +30,16 @@ interface AvatarProps {
 
 export function Avatar({ person, size = 40, active = true, className }: AvatarProps) {
   return (
-    <motion.span
+    <span
       className={clsx(
-        'inline-flex shrink-0 items-center justify-center rounded-full bg-linear-to-br font-bold text-ink transition-[filter,opacity] duration-300',
+        'inline-flex shrink-0 items-center justify-center rounded-full bg-linear-to-br font-bold text-ink',
         AVATAR_GRADIENTS[person.color % AVATAR_GRADIENTS.length],
-        !active && 'opacity-35 grayscale',
+        !active && 'opacity-35',
         className,
       )}
       style={{ width: size, height: size, fontSize: size * 0.38 }}
     >
       {initials(person.name)}
-    </motion.span>
+    </span>
   );
 }

@@ -1,16 +1,13 @@
 import clsx from 'clsx';
-import confetti from 'canvas-confetti';
-import { isLite } from '@/lib/perf';
-import { AnimatePresence, motion } from 'motion/react';
 import { Check, ChevronDown, Copy, MessageCircle, Receipt, Share2 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useI18n } from '@/i18n';
 import { useBill } from '@/store/billStore';
 import { computeSplit, type PersonShare } from '@/core/split';
 import { Avatar } from '@/components/ui/Avatar';
-import { AnimatedMoney } from '@/components/ui/AnimatedMoney';
+import { Money } from '@/components/ui/Money';
 import { Button } from '@/components/ui/Button';
-import { StepLayout, fadeUp, stagger } from '@/components/layout/StepLayout';
+import { StepLayout } from '@/components/layout/StepLayout';
 import { buildShareText } from './shareText';
 
 export function SummaryStep() {
@@ -20,15 +17,6 @@ export function SummaryStep() {
   const split = useMemo(() => computeSplit(items, extras, people), [items, extras, people]);
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const colors = ['#8b5cf6', '#ec4899', '#fb923c', '#bef264'];
-    const t = setTimeout(() => {
-      confetti({ particleCount: isLite ? 45 : 90, spread: 75, origin: { y: 0.3 }, colors, disableForReducedMotion: true });
-    }, 350);
-    return () => clearTimeout(t);
-  }, []);
 
   const text = buildShareText(split, merchant, dict, money);
   const share = async () => {
@@ -63,16 +51,15 @@ export function SummaryStep() {
       }
     >
       {/* Hero total */}
-      <motion.section
-        variants={fadeUp}
+      <section
         className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(135deg,var(--color-violet),var(--color-pink)_55%,var(--color-orange))] p-6 text-ink"
       >
-        <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/20 blur-2xl" />
+        <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-[radial-gradient(closest-side,rgb(255_255_255/0.3),transparent)]" />
         <p className="text-sm font-semibold opacity-80">
           {d.totalBill}
           {merchant && ` · ${merchant}`}
         </p>
-        <AnimatedMoney value={split.grandTotal} duration={1.4} className="mt-1 block font-mono text-4xl font-extrabold tracking-tight sm:text-5xl" />
+        <Money value={split.grandTotal} className="mt-1 block font-mono text-4xl font-extrabold tracking-tight sm:text-5xl" />
         <div className="mt-4 flex flex-wrap gap-2">
           <Button size="sm" className="bg-ink/85 text-white hover:bg-ink" onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')} icon={<MessageCircle className="h-4 w-4" />}>
             {d.whatsapp}
@@ -84,36 +71,30 @@ export function SummaryStep() {
             {d.share}
           </Button>
         </div>
-      </motion.section>
+      </section>
 
-      <motion.ul variants={stagger} className="flex flex-col gap-3">
-        {split.shares.map((s, i) => (
+      <ul className="flex flex-col gap-3">
+        {split.shares.map((s) => (
           <PersonCard
             key={s.person.id}
             share={s}
-            rank={i}
             ratio={s.total / maxTotal}
             open={open === s.person.id}
             onToggle={() => setOpen(open === s.person.id ? null : s.person.id)}
           />
         ))}
-      </motion.ul>
+      </ul>
     </StepLayout>
   );
 }
 
-function PersonCard({ share, rank, ratio, open, onToggle }: { share: PersonShare; rank: number; ratio: number; open: boolean; onToggle: () => void }) {
+function PersonCard({ share, ratio, open, onToggle }: { share: PersonShare; ratio: number; open: boolean; onToggle: () => void }) {
   const { dict, t, money } = useI18n();
   return (
-    <motion.li variants={fadeUp} layout className="glass overflow-hidden rounded-3xl">
+    <li className="glass overflow-hidden rounded-3xl">
       <button onClick={onToggle} className="relative flex w-full cursor-pointer items-center gap-3 p-4 text-start">
         {/* relative share bar */}
-        <motion.span
-          className="absolute inset-y-0 start-0 bg-white/[0.04]"
-          initial={{ width: 0 }}
-          animate={{ width: `${ratio * 100}%` }}
-          transition={{ delay: 0.3 + rank * 0.08, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        />
+        <span className="absolute inset-y-0 start-0 bg-white/[0.04]" style={{ width: `${ratio * 100}%` }} />
         <Avatar person={share.person} size={44} className="relative" />
         <div className="relative min-w-0 flex-1">
           <p className="truncate font-bold">{share.person.name}</p>
@@ -121,21 +102,13 @@ function PersonCard({ share, rank, ratio, open, onToggle }: { share: PersonShare
             {t(dict.summary.itemsCount, { n: share.items.length })}
           </p>
         </div>
-        <AnimatedMoney value={share.total} duration={1.1 + rank * 0.1} className="relative font-mono text-lg font-bold text-lime" />
-        <motion.span animate={{ rotate: open ? 180 : 0 }} className="relative text-mute">
+        <Money value={share.total} className="relative font-mono text-lg font-bold text-lime" />
+        <span className={clsx('relative text-mute', open && 'rotate-180')}>
           <ChevronDown className="h-5 w-5" />
-        </motion.span>
+        </span>
       </button>
 
-      <AnimatePresence initial={false}>
         {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 32 }}
-            className="overflow-hidden"
-          >
             <div className="mx-4 mb-4 border-t border-dashed border-line pt-3 text-sm">
               {share.items.map((l) => (
                 <Line key={l.id} label={l.label} value={money(l.amount)} />
@@ -145,10 +118,8 @@ function PersonCard({ share, rank, ratio, open, onToggle }: { share: PersonShare
                 <Line key={l.id} label={l.label} value={money(l.amount)} muted />
               ))}
             </div>
-          </motion.div>
         )}
-      </AnimatePresence>
-    </motion.li>
+    </li>
   );
 }
 
