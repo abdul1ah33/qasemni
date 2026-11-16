@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { parseAmount, toInputValue } from '@/core/money';
 import type { Piastres } from '@/core/types';
 
@@ -10,35 +10,33 @@ interface MoneyInputProps {
   ariaLabel?: string;
 }
 
+const format = (p: Piastres) => (p ? toInputValue(p) : '');
+
 /**
  * Lets the user type freely ("45", "45,5", "٤٥") and commits a clean integer
- * piastre value on every valid keystroke, re-formatting on blur.
+ * piastre value on every valid keystroke, re-formatting when focus leaves.
  */
 export function MoneyInput({ value, onChange, className, ariaLabel }: MoneyInputProps) {
-  const [draft, setDraft] = useState(() => (value ? toInputValue(value) : ''));
-  const [focused, setFocused] = useState(false);
-
-  useEffect(() => {
-    if (!focused) setDraft(value ? toInputValue(value) : '');
-  }, [value, focused]);
+  // While focused, show what the user typed; otherwise show the stored value.
+  const [draft, setDraft] = useState<string | null>(null);
 
   return (
     <input
       inputMode="decimal"
       aria-label={ariaLabel}
       placeholder="0.00"
-      value={draft}
+      value={draft ?? format(value)}
       onFocus={(e) => {
-        setFocused(true);
+        setDraft(format(value));
         e.currentTarget.select();
       }}
-      onBlur={() => setFocused(false)}
+      onBlur={() => setDraft(null)}
       onChange={(e) => {
         setDraft(e.target.value);
         const p = parseAmount(e.target.value);
         onChange(p === null ? 0 : Math.abs(p));
       }}
-      className={clsx('field font-mono tabular-nums', className)}
+      className={clsx('input text-end font-mono tabular-nums', className)}
       dir="ltr"
     />
   );

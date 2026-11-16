@@ -1,88 +1,62 @@
-import { Plus, UserRound, X } from 'lucide-react';
-import { useRef, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useI18n } from '@/i18n';
 import { useBill } from '@/store/billStore';
-import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
-import { StepLayout } from '@/components/layout/StepLayout';
+import { Screen } from '@/components/layout/Screen';
+import { RemoveButton } from '@/components/ui/RemoveButton';
 
 export function PeopleStep() {
-  const { dict, t } = useI18n();
+  const { dict } = useI18n();
   const d = dict.people;
   const people = useBill((s) => s.people);
   const addPerson = useBill((s) => s.addPerson);
   const removePerson = useBill((s) => s.removePerson);
   const renamePerson = useBill((s) => s.renamePerson);
   const [name, setName] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const submit = (e?: FormEvent) => {
-    e?.preventDefault();
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
     if (!name.trim()) return;
     addPerson(name);
     setName('');
-    inputRef.current?.focus();
   };
 
-  const hasMe = people.some((p) => p.name === d.me);
-
   return (
-    <StepLayout
+    <Screen
       title={d.title}
       subtitle={d.subtitle}
       canContinue={people.length >= 2}
-      footerNote={people.length < 2 ? <p className="text-center text-xs text-mute">{d.needTwo}</p> : undefined}
+      note={people.length < 2 ? <p className="text-center text-sm text-muted">{d.needTwo}</p> : undefined}
     >
-      <form onSubmit={submit} className="glass flex items-center gap-2 rounded-3xl p-2 ps-4">
-        <UserRound className="h-5 w-5 shrink-0 text-mute" />
+      <form onSubmit={submit} className="flex gap-2">
         <input
-          ref={inputRef}
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={d.placeholder}
-          autoFocus
           enterKeyHint="done"
-          className="min-w-0 flex-1 bg-transparent py-2 text-lg font-semibold outline-none placeholder:text-mute/60"
+          autoComplete="off"
+          className="input flex-1"
         />
-        <Button type="submit" variant="primary" disabled={!name.trim()} icon={<Plus className="h-5 w-5" />}>
+        <Button type="submit" variant="primary" disabled={!name.trim()}>
           {d.add}
         </Button>
       </form>
 
-      {!hasMe && (
-        <div>
-          <Button variant="soft" size="sm" onClick={() => addPerson(d.me)} icon={<Plus className="h-4 w-4" />}>
-            {d.me}
-          </Button>
-        </div>
-      )}
-
-      <div>
-        <p className="mb-3 text-sm text-mute">{t(d.count, { n: people.length })}</p>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {people.map((p) => (
-              <li
-                key={p.id}
-                className="glass group relative flex flex-col items-center gap-2 rounded-3xl p-4"
-              >
-                <Avatar person={p} size={56} />
-                <input
-                  value={p.name}
-                  onChange={(e) => renamePerson(p.id, e.target.value)}
-                  className="field text-center font-semibold"
-                  aria-label="name"
-                />
-                <button
-                  onClick={() => removePerson(p.id)}
-                  className="absolute top-2 end-2 grid h-7 w-7 cursor-pointer place-items-center rounded-full text-mute hover:bg-red-500/15 hover:text-red-400"
-                  aria-label="remove"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </li>
-            ))}
+      {people.length > 0 && (
+        <ul className="card divide-y divide-line">
+          {people.map((p) => (
+            <li key={p.id} className="flex items-center gap-2 px-3 py-1.5">
+              <input
+                value={p.name}
+                onChange={(e) => renamePerson(p.id, e.target.value)}
+                aria-label={d.placeholder}
+                className="h-10 min-w-0 flex-1 bg-transparent outline-none"
+              />
+              <RemoveButton label={d.remove} onClick={() => removePerson(p.id)} />
+            </li>
+          ))}
         </ul>
-      </div>
-    </StepLayout>
+      )}
+    </Screen>
   );
 }

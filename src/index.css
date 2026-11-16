@@ -1,73 +1,60 @@
 @import 'tailwindcss';
 
+/*
+ * Plain, flat design: one surface colour, one border colour, one accent.
+ * Colours are CSS variables so dark mode is a single override below.
+ */
 @theme {
-  --font-sans: 'Plus Jakarta Sans', 'Cairo', ui-sans-serif, system-ui, sans-serif;
-  --font-arabic: 'Cairo', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans Arabic', 'Geeza Pro', Tahoma, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --color-ink: #07070c;
-  --color-ink-2: #0e0e17;
-  --color-line: rgb(255 255 255 / 0.08);
-  --color-mute: #8b8ba7;
-  --color-violet: #8b5cf6;
-  --color-pink: #ec4899;
-  --color-orange: #fb923c;
-  --color-lime: #bef264;
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-soft: var(--soft);
 }
 
 :root {
-  color-scheme: dark;
+  --bg: #f6f6f4;
+  --card: #ffffff;
+  --fg: #18181b;
+  --muted: #71717a;
+  --line: #e4e4e7;
+  --soft: #f1f1ef;
+  --accent: #0f766e;
+  --accent-fg: #ffffff;
+  color-scheme: light;
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
 }
 
-html[lang='ar'] body {
-  font-family: var(--font-arabic);
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111113;
+    --card: #1b1b1f;
+    --fg: #f4f4f5;
+    --muted: #a1a1aa;
+    --line: #2e2e33;
+    --soft: #24242a;
+    --accent: #2dd4bf;
+    --accent-fg: #042f2e;
+    color-scheme: dark;
+  }
 }
 
 body {
-  @apply bg-ink text-white antialiased;
-  min-height: 100dvh;
-  overflow-x: hidden;
+  @apply bg-bg font-sans text-fg antialiased;
 }
 
-/* Component classes live in a layer so Tailwind utilities can override them. */
-@layer components {
-  .text-gradient {
-    background: linear-gradient(90deg, var(--color-violet), var(--color-pink), var(--color-orange));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  .glass {
-    @apply border border-line bg-white/[0.035] backdrop-blur-xl;
-    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 20px 50px -20px rgb(0 0 0 / 0.6);
-  }
-
-  /* Inputs that look like plain text until focused */
-  .field {
-    @apply w-full rounded-xl border border-transparent bg-transparent px-2 py-1.5 outline-none;
-    @apply hover:bg-white/[0.04] focus:border-violet/60 focus:bg-white/[0.06];
-  }
-
-  /* Torn-paper edge for the receipt-style cards */
-  .receipt-edge {
-    --tooth: 10px;
-    mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / var(--tooth) 100%;
-  }
-
-  /*
-   * Phones & tablets: live backdrop blur behind every card is the biggest cause
-   * of janky scrolling, so glass becomes a slightly more opaque flat surface.
-   */
-  @media (hover: none), (pointer: coarse), (max-width: 767px) {
-    .glass {
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-      background-color: rgb(20 20 32 / 0.72);
-      box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.05);
-    }
-  }
+/* Stop iOS from zooming into inputs: anything under 16px triggers it. */
+input,
+select,
+textarea {
+  font-size: 16px;
 }
 
 input[type='number']::-webkit-inner-spin-button,
@@ -76,13 +63,13 @@ input[type='number']::-webkit-outer-spin-button {
   margin: 0;
 }
 
-::selection {
-  background: rgb(139 92 246 / 0.4);
-}
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-card;
+  }
 
-/* No animations or transitions anywhere: the app should feel instant. */
-*, *::before, *::after {
-  animation: none !important;
-  transition: none !important;
-  scroll-behavior: auto !important;
+  /* Bordered text input */
+  .input {
+    @apply h-11 w-full min-w-0 rounded-xl border border-line bg-card px-3 outline-none focus:border-accent;
+  }
 }

@@ -1,11 +1,7 @@
 import clsx from 'clsx';
-import { AlertTriangle, Camera, ImageUp, PencilLine, ShieldCheck, Sparkles } from 'lucide-react';
-import { useRef, useState, type DragEvent } from 'react';
+import { useRef, useState, type ChangeEvent } from 'react';
 import { useI18n } from '@/i18n';
 import { Button } from '@/components/ui/Button';
-import { CameraModal } from './CameraModal';
-import { ReceiptIllustration } from './ReceiptIllustration';
-import { ScanningView } from './ScanningView';
 import { useReceiptScanner } from './useReceiptScanner';
 import type { OcrLanguage } from './ocr.service';
 
@@ -14,146 +10,88 @@ export function ScanStep() {
   const d = dict.scan;
   const [ocrLang, setOcrLang] = useState<OcrLanguage>(lang === 'ar' ? 'ara+eng' : 'eng');
   const { status, scanImage, loadSample, startManual, dismiss } = useReceiptScanner(ocrLang);
-  const [cameraOpen, setCameraOpen] = useState(false);
-  const [dragging, setDragging] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const libraryRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (file?: File | Blob | null) => {
+  // Uses the phone's own camera app: faster and more reliable than an in-page camera.
+  const onPick = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
     if (file && file.type.startsWith('image/')) scanImage(file);
   };
 
-  const onDrop = (e: DragEvent) => {
-    e.preventDefault();
-    setDragging(false);
-    handleFile(e.dataTransfer.files[0]);
-  };
-
   if (status.kind === 'scanning') {
+    const pct = Math.round(status.progress * 100);
     return (
-      <div className="flex min-h-[70vh] items-center py-10">
-        <ScanningView imageUrl={status.imageUrl} phase={status.phase} progress={status.progress} />
+      <div className="flex flex-1 flex-col justify-center gap-3 pb-20">
+        <div className="flex justify-between text-sm">
+          <span className="font-semibold">{d[status.phase]}</span>
+          <span className="font-mono text-muted">{pct}%</span>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-line">
+          <div className="h-full bg-accent" style={{ width: `${pct}%` }} />
+        </div>
+        <p className="text-sm text-muted">{d.firstTime}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-8 pt-6 pb-16">
-      <div className="grid items-center gap-8 sm:grid-cols-[1fr_auto]">
-        <div>
-          <span className="glass mb-5 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold text-lime">
-            <Sparkles className="h-3.5 w-3.5" /> {dict.tagline}
-          </span>
-          <h1 className="text-[2.6rem] leading-[1.05] font-extrabold tracking-tight sm:text-6xl">
-            {d.title}
-            <br />
-            <span className="text-gradient">{d.titleAccent}</span>
-          </h1>
-          <p className="mt-4 max-w-md text-mute">{d.subtitle}</p>
-        </div>
-        <div className="hidden sm:block">
-          <ReceiptIllustration />
-        </div>
-      </div>
+    <div className="flex flex-1 flex-col gap-6 pt-4 pb-8">
+      <header>
+        <h1 className="text-3xl font-bold">{d.title}</h1>
+        <p className="mt-2 text-muted">{d.subtitle}</p>
+      </header>
 
-        {status.kind === 'error' && (
-            <div className="flex items-start gap-3 rounded-2xl border border-orange/30 bg-orange/10 p-4 text-sm">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-orange" />
-              <div className="flex-1">
-                <p>{d[status.reason]}</p>
-                <div className="mt-3 flex gap-2">
-                  <Button size="sm" variant="primary" onClick={startManual} icon={<PencilLine className="h-4 w-4" />}>
-                    {d.manual}
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={dismiss}>
-                    ✕
-                  </Button>
-                </div>
-              </div>
-            </div>
-        )}
-
-      {/* Drop zone */}
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
-        className={clsx(
-          'group relative overflow-hidden rounded-[2rem] p-[1.5px]',
-          dragging && 'ring-2 ring-lime',
-        )}
-      >
-        {/* gradient border */}
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--color-violet),var(--color-pink),var(--color-orange))]" />
-        <div className="relative flex flex-col items-center gap-5 rounded-[calc(2rem-1.5px)] bg-ink-2/95 px-5 py-8 text-center sm:py-10">
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <Button variant="primary" size="lg" onClick={() => setCameraOpen(true)} icon={<Camera className="h-5 w-5" />}>
-              {d.takePhoto}
+      {status.kind === 'error' && (
+        <div className="card border-amber-500/50 p-4 text-sm">
+          <p>{d[status.reason]}</p>
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" variant="primary" onClick={startManual}>
+              {d.manual}
             </Button>
-            <Button variant="soft" size="lg" onClick={() => fileRef.current?.click()} icon={<ImageUp className="h-5 w-5" />}>
-              {d.upload}
+            <Button size="sm" onClick={dismiss}>
+              {d.dismiss}
             </Button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={(e) => {
-                handleFile(e.target.files?.[0]);
-                e.target.value = '';
-              }}
-            />
-          </div>
-          <p className="text-sm text-mute">{dragging ? d.dropActive : d.dropHint}</p>
-
-          {/* receipt language */}
-          <div className="flex items-center gap-3 text-xs">
-            <span className="text-mute">{d.receiptLang}</span>
-            <div className="relative flex rounded-full bg-white/5 p-1">
-              {(['eng', 'ara+eng'] as const).map((l) => (
-                <button
-                  key={l}
-                  onClick={() => setOcrLang(l)}
-                  className={clsx('relative cursor-pointer rounded-full px-3 py-1 font-semibold', ocrLang === l ? 'text-ink' : 'text-mute hover:text-white')}
-                >
-                  {ocrLang === l && <span className="absolute inset-0 rounded-full bg-white" />}
-                  <span className="relative">{l === 'eng' ? d.langEnglish : d.langArabic}</span>
-                </button>
-              ))}
-            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        <Button variant="ghost" size="sm" onClick={loadSample} icon={<Sparkles className="h-4 w-4 text-pink" />}>
-          {d.trySample}
+      <div className="flex flex-col gap-2">
+        <Button variant="primary" size="lg" onClick={() => cameraRef.current?.click()}>
+          {d.takePhoto}
         </Button>
-        <span className="text-line">•</span>
-        <Button variant="ghost" size="sm" onClick={startManual} icon={<PencilLine className="h-4 w-4" />}>
+        <Button size="lg" onClick={() => libraryRef.current?.click()}>
+          {d.upload}
+        </Button>
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={onPick} />
+        <input ref={libraryRef} type="file" accept="image/*" hidden onChange={onPick} />
+      </div>
+
+      <div className="flex items-center justify-between gap-3 text-sm">
+        <span className="text-muted">{d.receiptLang}</span>
+        <div className="flex rounded-lg border border-line bg-card p-0.5">
+          {(['eng', 'ara+eng'] as const).map((l) => (
+            <button
+              key={l}
+              type="button"
+              onClick={() => setOcrLang(l)}
+              className={clsx('h-8 cursor-pointer rounded-md px-3 font-medium', ocrLang === l ? 'bg-accent text-accent-fg' : 'text-muted')}
+            >
+              {l === 'eng' ? d.langEnglish : d.langArabic}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center gap-1 border-t border-line pt-4">
+        <Button variant="ghost" onClick={startManual}>
           {d.manual}
         </Button>
+        <Button variant="ghost" onClick={loadSample}>
+          {d.trySample}
+        </Button>
       </div>
-
-      <p className="flex items-center justify-center gap-2 text-xs text-mute">
-        <ShieldCheck className="h-4 w-4 text-lime" /> {d.privacy}
-      </p>
-
-      {/* On phones the illustration sits below the actions so they stay above the fold. */}
-      <div className="sm:hidden">
-        <ReceiptIllustration />
-      </div>
-
-      <CameraModal
-        open={cameraOpen}
-        onClose={() => setCameraOpen(false)}
-        onCapture={(blob) => {
-          setCameraOpen(false);
-          handleFile(blob);
-        }}
-      />
     </div>
   );
 }

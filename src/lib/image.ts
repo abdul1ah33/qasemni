@@ -3,20 +3,24 @@
  * converts it to grayscale and stretches the contrast. Runs on a canvas, so
  * everything stays on the user's device.
  */
-const TARGET_LONG_SIDE = 2200;
+const TARGET_LONG_SIDE = 1800;
 
 export async function loadImage(src: Blob | string): Promise<HTMLImageElement> {
   const url = typeof src === 'string' ? src : URL.createObjectURL(src);
   const img = new Image();
   img.decoding = 'async';
   img.src = url;
-  await img.decode();
+  try {
+    await img.decode();
+  } finally {
+    if (typeof src !== 'string') URL.revokeObjectURL(url);
+  }
   return img;
 }
 
 export async function preprocessForOcr(src: Blob | string): Promise<HTMLCanvasElement> {
   const img = await loadImage(src);
-  const scale = Math.min(2.5, TARGET_LONG_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+  const scale = Math.min(2, TARGET_LONG_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
   const w = Math.round(img.naturalWidth * scale);
   const h = Math.round(img.naturalHeight * scale);
 
@@ -50,15 +54,4 @@ export async function preprocessForOcr(src: Blob | string): Promise<HTMLCanvasEl
   }
   ctx.putImageData(data, 0, 0);
   return canvas;
-}
-
-/** Grabs the current frame of a <video> as a JPEG blob. */
-export function captureVideoFrame(video: HTMLVideoElement): Promise<Blob> {
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d')!.drawImage(video, 0, 0);
-  return new Promise((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('capture failed'))), 'image/jpeg', 0.92),
-  );
 }

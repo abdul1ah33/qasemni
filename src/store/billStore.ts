@@ -10,8 +10,6 @@ export const AVATAR_COLORS = 8;
 
 interface BillState {
   step: Step;
-  /** Navigation direction, used to pick the slide animation. */
-  direction: 1 | -1;
   imageUrl: string | null;
   merchant: string;
   detectedTotal: Piastres | null;
@@ -50,7 +48,6 @@ const defaultSplitMode = (kind: ExtraKind): Extra['splitMode'] => (kind === 'del
 
 const initial = {
   step: 'scan' as Step,
-  direction: 1 as const,
   imageUrl: null,
   merchant: '',
   detectedTotal: null,
@@ -64,20 +61,20 @@ export const useBill = create<BillState>()(
     (set, get) => ({
       ...initial,
 
-      goTo: (step) => set({ step, direction: STEPS.indexOf(step) >= STEPS.indexOf(get().step) ? 1 : -1 }),
+      goTo: (step) => set({ step }),
       next: () => {
         const i = STEPS.indexOf(get().step);
-        if (i < STEPS.length - 1) set({ step: STEPS[i + 1], direction: 1 });
+        if (i < STEPS.length - 1) set({ step: STEPS[i + 1] });
       },
       back: () => {
         const i = STEPS.indexOf(get().step);
-        if (i > 0) set({ step: STEPS[i - 1], direction: -1 });
+        if (i > 0) set({ step: STEPS[i - 1] });
       },
       reset: () => {
         const { imageUrl, people } = get();
         if (imageUrl) URL.revokeObjectURL(imageUrl);
         // Keep the people — friends usually split again together.
-        set({ ...initial, people, direction: -1 });
+        set({ ...initial, people });
       },
 
       loadReceipt: (parsed, imageUrl) =>
@@ -88,7 +85,6 @@ export const useBill = create<BillState>()(
           items: parsed.items.map((i) => ({ ...i, id: uid(), assignees: [] })),
           extras: parsed.extras.map((e) => ({ ...e, id: uid(), splitMode: defaultSplitMode(e.kind) })),
           step: 'review',
-          direction: 1,
         }),
       setMerchant: (merchant) => set({ merchant }),
 
@@ -144,7 +140,7 @@ export const useBill = create<BillState>()(
       version: 1,
       storage: createJSONStorage(() => localStorage),
       // Object URLs don't survive a reload, so the image isn't persisted.
-      partialize: ({ imageUrl: _img, direction: _dir, ...rest }) => rest,
+      partialize: ({ imageUrl: _img, ...rest }) => rest,
     },
   ),
 );

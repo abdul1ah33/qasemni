@@ -8,7 +8,7 @@ Snap a photo of a receipt (or upload one), fix anything the scanner misread, pic
 
 ## Features
 
-- 📸 **Live camera** with a receipt viewfinder, plus upload and drag & drop
+- 📸 **Camera or photo library**, using the phone's own camera app
 - 🔍 **On-device OCR** for English and Arabic receipts (Arabic-Indic digits supported)
 - 🧠 **Receipt parser** that finds items, quantities, subtotal, service, VAT, delivery, tip, discounts and the total
 - ✏️ **Editable review**, with a check against the receipt's printed total
@@ -17,11 +17,11 @@ Snap a photo of a receipt (or upload one), fix anything the scanner misread, pic
 - 💸 **Exact math**: integer piastres and largest-remainder rounding, so the shares always add up to the total
 - 🌍 **English / Arabic** with full RTL layout, formatted in EGP
 - 📤 **Share** to WhatsApp, the native share sheet or the clipboard
-- ✨ Motion-driven UI: page transitions, a scanning laser, counting numbers, confetti
+- 🪶 **Simple, flat UI**: no animations, system fonts, light & dark mode
 
 ## Tech stack
 
-React 19 · TypeScript · Vite · Tailwind CSS v4 · Motion (Framer Motion) · Zustand · Tesseract.js · Vitest
+React 19 · TypeScript · Vite · Tailwind CSS v4 · Zustand · Tesseract.js · Vitest
 
 ## Getting started
 
@@ -52,19 +52,17 @@ src/
 │   │   ├── ocr.service.ts         # Tesseract worker (lazy-loaded)
 │   │   ├── parser/                # OCR text → ParsedReceipt (keyword rules + heuristics)
 │   │   ├── useReceiptScanner.ts   # Orchestrates image → OCR → parser → store
-│   │   ├── CameraModal.tsx        # getUserMedia viewfinder
-│   │   ├── ScanningView.tsx       # Laser-scan progress animation
-│   │   └── ScanStep.tsx
+│   │   └── ScanStep.tsx           # Photo picker + scan progress
 │   ├── review/              # Edit items, taxes & fees
 │   ├── people/              # Add the people at the table
-│   ├── assign/              # Tap avatars to assign items
+│   ├── assign/              # Tap names to assign items
 │   └── summary/             # Final split + sharing
 │
 ├── store/billStore.ts       # Zustand store: the bill + step navigation (persisted to localStorage)
 ├── i18n/                    # en.ts / ar.ts dictionaries + useI18n() hook (RTL aware)
 ├── components/
-│   ├── layout/              # Header, Stepper, StepLayout (shared step shell)
-│   └── ui/                  # Button, Avatar, AnimatedMoney, MoneyInput, Background
+│   ├── layout/              # Screen (shared step shell with bottom bar)
+│   └── ui/                  # Button, MoneyInput, RemoveButton
 └── lib/                     # Small browser helpers (image preprocessing, ids)
 ```
 
